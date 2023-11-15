@@ -12,8 +12,25 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
+  try {
+      email = 'nikita@bdec.in'
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+    console.log(user);
+
+    if (!user) {
+      console.log('Invalid credentials')
+      // return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+   
+  }catch(e) {
+      console.log('error at startup: ', e.toString());
+  }
+
 });
 
 const { PrismaClient } = require('@prisma/client');
