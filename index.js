@@ -144,6 +144,7 @@ app.get('/expenses/:userId', async (req, res) => {
 
 // API endpoint to update an expense for a specific user
 app.put('/api/expense/:userId/:expenseId', async (req, res) => {
+  console.log(' calling api of update expense ');
   const { userId, expenseId } = req.params;
   const { amount, description, date } = req.body;
 
