@@ -108,17 +108,21 @@ app.post('/expense', async (req, res) => {
   try {
     const { userId, amount, description, date } = req.body;
 
-    const income = await prisma.expense.create({
+    // Assuming date is in the format "YYYY-MM-DD"
+    const formattedDate = new Date(`${date}T00:00:00.000Z`);
+
+    const expense = await prisma.expense.create({
       data: {
         userId,
         amount,
         description,
-        date: new Date(date),
+        date: formattedDate,
       },
     });
-    res.status(201).json(income);
+
+    res.status(201).json(expense);
   } catch (error) {
-    console.log({ error: 'Error adding expense: ' + error.toString() })
+    console.error({ error: 'Error adding expense: ' + error.toString() });
     res.status(500).json({ error: 'Error adding expense: ' + error.toString() });
   }
 });
@@ -129,7 +133,7 @@ app.get('/expenses/:userId', async (req, res) => {
     const expenses = await prisma.expense.findMany({
       where: {
         userId: userId,
-      }
+      },
     });
     res.status(200).json(expenses);
   } catch (error) {
@@ -137,10 +141,11 @@ app.get('/expenses/:userId', async (req, res) => {
   }
 });
 
+
 // API endpoint to update an expense for a specific user
 app.put('/api/expense/:userId/:expenseId', async (req, res) => {
   const { userId, expenseId } = req.params;
-  const { amount, description, category, date } = req.body;
+  const { amount, description, date } = req.body;
 
   try {
     // Check if the expense record exists and belongs to the specified user
@@ -161,16 +166,19 @@ app.put('/api/expense/:userId/:expenseId', async (req, res) => {
       data: {
         amount,
         description,
-        // category,
-        date,
+        date: new Date(date), // Convert date to Date object
       },
     });
 
     res.json(updatedExpense);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error updating expense' });
   }
 });
+
+
+
 
 // API endpoint to delete an expense for a specific user
 app.delete('/api/expense/:userId/:expenseId', async (req, res) => {
@@ -200,25 +208,31 @@ app.delete('/api/expense/:userId/:expenseId', async (req, res) => {
   }
 });
 
+// API endpoint to add income
 app.post('/income', async (req, res) => {
   try {
     const { userId, amount, description, date } = req.body;
+
+    // Handle the conversion from "YYYY-mm-dd" to a JavaScript Date object
+    const formattedDate = new Date(`${date}T00:00:00Z`);
 
     const income = await prisma.income.create({
       data: {
         userId,
         amount,
         description,
-        date: new Date(date),
+        date: formattedDate,
       },
     });
+
     res.status(201).json(income);
   } catch (error) {
-    console.log({ error: 'Error adding income: ' + error.toString() })
+    console.error('Error adding income:', error);
     res.status(500).json({ error: 'Error adding income: ' + error.toString() });
   }
 });
 
+// API endpoint to get incomes for a specific user
 app.get('/incomes/:userId', async (req, res) => {
   try {
     const userId = parseInt(req.params.userId);
@@ -229,7 +243,7 @@ app.get('/incomes/:userId', async (req, res) => {
     });
     res.status(200).json(incomes);
   } catch (error) {
-    console.log({ error: 'Error fetching income: ' + error.toString() })
+    console.error('Error fetching incomes:', error);
     res.status(500).json({ error: 'Error fetching incomes' });
   }
 });
@@ -252,18 +266,22 @@ app.put('/api/income/:userId/:incomeId', async (req, res) => {
       return res.status(404).json({ error: 'Income record not found' });
     }
 
+    // Handle the conversion from "YYYY-mm-dd" to a JavaScript Date object
+    const formattedDate = new Date(`${date}T00:00:00Z`);
+
     // Update the income record
     const updatedIncome = await prisma.income.update({
       where: { id: existingIncome.id },
       data: {
         amount,
         description,
-        date,
+        date: formattedDate,
       },
     });
 
     res.json(updatedIncome);
   } catch (error) {
+    console.error('Error updating income:', error);
     res.status(500).json({ error: 'Error updating income' });
   }
 });
@@ -292,9 +310,13 @@ app.delete('/api/income/:userId/:incomeId', async (req, res) => {
 
     res.json({ message: 'Income record deleted successfully' });
   } catch (error) {
+    console.error('Error deleting income:', error);
     res.status(500).json({ error: 'Error deleting income' });
   }
 });
+
+
+
 
 async function calculateTotalIncome() {
   try {
