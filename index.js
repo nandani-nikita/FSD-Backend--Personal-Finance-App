@@ -148,6 +148,8 @@ app.put('/api/expense/:userId/:expenseId', async (req, res) => {
   const { amount, description, date } = req.body;
 
   try {
+    console.log(req.body);
+    console.log(req.params);
     // Check if the expense record exists and belongs to the specified user
     const existingExpense = await prisma.expense.findFirst({
       where: {
@@ -155,6 +157,7 @@ app.put('/api/expense/:userId/:expenseId', async (req, res) => {
         userId: parseInt(userId, 10),
       },
     });
+    console.log(existingExpense);
 
     if (!existingExpense) {
       return res.status(404).json({ error: 'Expense record not found' });
@@ -169,6 +172,7 @@ app.put('/api/expense/:userId/:expenseId', async (req, res) => {
         date: new Date(date), // Convert date to Date object
       },
     });
+    console.log(updatedExpense);
 
     res.json(updatedExpense);
   } catch (error) {
